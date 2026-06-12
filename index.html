@@ -234,7 +234,7 @@ function load(){try{notes=JSON.parse(localStorage.getItem('notes_v2')||'[]');}ca
 function save(){localStorage.setItem('notes_v2',JSON.stringify(notes));}
 function renderList(){
   const q=document.getElementById('search-input').value.toLowerCase();
-  let filtered=notes.filter(n=>{const mf=currentFolder==='all'||(n.color||'yellow')===currentFolder;const ms=!q||n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q);return mf&&ms;}).sort((a,b)=>b.updated-a.updated);
+  let filtered=(currentFolder==='all'?notes:notes.filter(n=>(n.color||'yellow')===currentFolder)).filter(n=>!q||n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated);
   const list=document.getElementById('notes-list'),empty=document.getElementById('empty-state');
   document.getElementById('notes-count').textContent=notes.length+' '+plural(notes.length,'нотатка','нотатки','нотаток');
   if(!filtered.length){list.innerHTML='';list.appendChild(empty);empty.style.display='flex';document.getElementById('stats-bar').textContent='';return;}
