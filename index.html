@@ -370,7 +370,7 @@ function render(){
       </div>
       ${prev?`<div class="ncard-preview">${esc(prev)}</div>`:''}
       <div class="ncard-footer">
-        <span class="ncard-date">${ago(n.updated)}</span>
+        <span class="ncard-date">✏️ ${ago(n.updated)}${n.created&&n.created!==n.updated?" · 📅 "+new Date(n.created).toLocaleDateString("uk-UA"):""}</span>
         ${rem}
       </div>
       ${n.pinned?'<div class="ncard-pinned">📌</div>':''}
@@ -418,7 +418,7 @@ function saveNote(){
   cremind=document.getElementById('remind-val').value||'';
   load();
   const idx=notes.findIndex(n=>n.id===cid);
-  const note={id:cid,title,body,priority:cpriority,pinned:cpinned,remind:cremind,updated:Date.now()};
+  const note={id:cid,title,body,priority:cpriority,pinned:cpinned,remind:cremind,updated:Date.now(),created:notes.find(n=>n.id===cid)?.created||Date.now()};
   if(idx>=0)notes[idx]=note; else notes.push(note);
   save();
   const btn=document.getElementById('btn-save');
