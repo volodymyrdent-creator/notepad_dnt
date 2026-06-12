@@ -258,7 +258,7 @@ function insertDate(){insertText(new Date().toLocaleDateString('uk-UA'),'');}
 function insertTime(){insertText(new Date().toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'}),'');}
 function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+n).classList.add('active');}
 function goBack(){showScreen('list');renderList();}
-function setFolder(f,el){currentFolder=f;document.querySelectorAll('.folder-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderList();}
+function setFolder(f,el){currentFolder=f;document.querySelectorAll('.folder-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');load();renderList();}
 function openSettings(){const kb=(JSON.stringify(notes).length/1024).toFixed(1);document.getElementById('settings-info').textContent=notes.length+' нотаток · '+kb+' КБ · PIN ✅';document.getElementById('settings-modal').classList.add('open');}
 function clearAll(){if(!confirm('Видалити всі нотатки?'))return;notes=[];save();document.getElementById('settings-modal').classList.remove('open');renderList();}
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
