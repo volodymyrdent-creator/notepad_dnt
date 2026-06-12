@@ -4,282 +4,496 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Нотатник">
-<title>Нотатник</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Нотатки">
+<title>Нотатки</title>
 <style>
-:root{--bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;--border:#48484a;--text:#ffffff;--muted:#8e8e93;--accent:#ffd60a;--red:#ff453a;--blue:#0a84ff;--radius:12px;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;user-select:none;}
-.pin-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:32px;}
-.pin-logo{font-size:3rem;}
-.pin-title{font-size:1.2rem;font-weight:700;letter-spacing:1px;}
-.pin-subtitle{font-size:.85rem;color:var(--muted);margin-top:-24px;}
-.pin-dots{display:flex;gap:20px;}
-.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);transition:all .2s;}
-.pin-dot.filled{background:var(--accent);border-color:var(--accent);}
-.pin-dot.error{background:var(--red);border-color:var(--red);animation:shake .4s;}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px;}
-.pin-key{background:var(--bg2);border:none;color:var(--text);border-radius:50%;width:70px;height:70px;font-size:1.5rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;margin:0 auto;}
-.pin-key:active{background:var(--bg3);transform:scale(.92);}
-.pin-key.empty{background:transparent;pointer-events:none;}
-.pin-error-text{color:var(--red);font-size:.82rem;height:20px;text-align:center;}
-.pin-forgot{color:var(--blue);font-size:.82rem;cursor:pointer;}
-.screen{display:none;height:100vh;flex-direction:column;}
-.screen.active{display:flex;}
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;padding-top:max(16px,env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid var(--border);}
-.header-title{font-size:1.1rem;font-weight:700;}
-.header-btn{background:none;border:none;color:var(--accent);font-size:1rem;font-weight:600;cursor:pointer;padding:6px 10px;border-radius:8px;font-family:inherit;}
-.header-btn:active{opacity:.6;}
-.header-btn.red{color:var(--red);}
-.header-btn.muted{color:var(--muted);}
-.search-wrap{padding:10px 16px;background:var(--bg);position:relative;}
-.search-icon{position:absolute;left:28px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none;}
-.search-input{width:100%;background:var(--bg3);border:none;border-radius:10px;padding:9px 14px 9px 36px;color:var(--text);font-size:.9rem;font-family:inherit;outline:none;}
-.notes-list{flex:1;overflow-y:auto;padding:8px 16px;-webkit-overflow-scrolling:touch;}
-.notes-list::-webkit-scrollbar{display:none;}
-.note-item{background:var(--bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:opacity .15s;position:relative;overflow:hidden;}
-.note-item:active{opacity:.7;}
-.note-title{font-size:.95rem;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.note-preview{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.note-date{font-size:.7rem;color:var(--muted);margin-top:6px;}
-.note-color-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px;}
-.fab{position:fixed;bottom:max(28px,env(safe-area-inset-bottom,20px));right:24px;width:56px;height:56px;background:var(--accent);border-radius:50%;border:none;font-size:1.6rem;color:#000;cursor:pointer;box-shadow:0 4px 20px rgba(255,214,10,.4);display:flex;align-items:center;justify-content:center;transition:transform .15s;}
-.fab:active{transform:scale(.9);}
-.color-strip{display:flex;gap:10px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;}
-.color-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;border:2px solid transparent;transition:border-color .15s;}
-.color-dot.selected{border-color:#fff;}
-.editor-toolbar{display:flex;gap:6px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.editor-toolbar::-webkit-scrollbar{display:none;}
-.tool-btn{background:var(--bg3);border:none;color:var(--text);padding:7px 12px;border-radius:8px;font-size:.8rem;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
-.tool-btn:active{opacity:.6;}
-.title-input{width:100%;background:transparent;border:none;color:var(--text);font-size:1.3rem;font-weight:700;padding:16px 20px 8px;font-family:inherit;outline:none;}
-.title-input::placeholder{color:var(--muted);}
-.note-editor{flex:1;width:100%;background:transparent;border:none;color:var(--text);font-size:.95rem;line-height:1.7;padding:8px 20px 100px;font-family:inherit;outline:none;resize:none;-webkit-overflow-scrolling:touch;}
-.note-editor::placeholder{color:var(--muted);}
-.stats-bar{padding:8px 20px;font-size:.72rem;color:var(--muted);text-align:center;border-top:1px solid var(--border);}
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--muted);}
-.empty-icon{font-size:3.5rem;opacity:.3;}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal-box{background:var(--bg2);border-radius:14px;width:280px;overflow:hidden;text-align:center;}
-.modal-title{font-size:1rem;font-weight:700;padding:20px 20px 8px;}
-.modal-sub{font-size:.83rem;color:var(--muted);padding:0 20px 16px;}
-.modal-actions{border-top:1px solid var(--border);display:flex;}
-.modal-btn{flex:1;padding:14px;background:none;border:none;font-family:inherit;font-size:.9rem;cursor:pointer;color:var(--blue);}
-.modal-btn.danger{color:var(--red);font-weight:700;}
-.modal-btn:not(:last-child){border-right:1px solid var(--border);}
-.modal-btn:active{opacity:.6;}
-.folder-tabs{display:flex;gap:8px;padding:8px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.folder-tabs::-webkit-scrollbar{display:none;}
-.folder-tab{background:var(--bg3);border:none;color:var(--muted);padding:6px 14px;border-radius:20px;font-size:.78rem;font-family:inherit;cursor:pointer;white-space:nowrap;flex-shrink:0;}
-.folder-tab.active{background:var(--accent);color:#000;font-weight:600;}
+:root{
+  --bg:#f9f9f9;--card:#fff;--border:#ebebeb;
+  --text:#1a1a1a;--muted:#9a9a9a;--sub:#c0c0c0;
+  --accent:#1a1a1a;
+  --p-urgent:#ff3b30;--p-urgent-bg:#fff2f1;--p-urgent-border:#ffd0cd;
+  --p-important:#ff9500;--p-important-bg:#fff8ee;--p-important-border:#fde5b8;
+  --p-normal:#34c759;--p-normal-bg:#f2fff5;--p-normal-border:#b8f0c5;
+  --radius:14px;--shadow:0 2px 12px rgba(0,0,0,.06);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
+
+/* PIN */
+#pin-wrap{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:100;}
+.pin-icon{font-size:2.4rem;line-height:1;}
+.pin-h{font-size:1.1rem;font-weight:700;letter-spacing:-.3px;}
+.pin-sub{font-size:.8rem;color:var(--muted);margin-top:-18px;}
+.pdots{display:flex;gap:14px;}
+.pdot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--sub);transition:all .18s;}
+.pdot.on{background:var(--accent);border-color:var(--accent);}
+.pdot.err{background:var(--p-urgent);border-color:var(--p-urgent);animation:sh .35s;}
+@keyframes sh{0%,100%{transform:translateX(0)}30%{transform:translateX(-5px)}70%{transform:translateX(5px)}}
+.perr{font-size:.75rem;color:var(--p-urgent);min-height:16px;text-align:center;}
+.keypad{display:grid;grid-template-columns:repeat(3,68px);gap:10px;}
+.pkey{width:68px;height:68px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:1.3rem;font-weight:500;cursor:pointer;font-family:inherit;box-shadow:var(--shadow);transition:all .12s;}
+.pkey:active{background:var(--border);transform:scale(.93);}
+.pkey.ghost{background:transparent;border:none;box-shadow:none;pointer-events:none;}
+.pforgot{font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+
+/* PAGES */
+.page{display:none;flex-direction:column;height:100vh;background:var(--bg);}
+.page.on{display:flex;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;padding-top:max(16px,env(safe-area-inset-top));background:var(--bg);flex-shrink:0;}
+.hdr-title{font-size:1.05rem;font-weight:700;letter-spacing:-.3px;}
+.hbtn{background:none;border:none;color:var(--accent);font-size:.85rem;font-weight:600;cursor:pointer;padding:7px 10px;border-radius:10px;font-family:inherit;white-space:nowrap;transition:background .12s;}
+.hbtn:active{background:var(--border);}
+.hbtn.ghost{color:var(--muted);}
+.hbtn.red{color:var(--p-urgent);}
+.hbtn.green{color:var(--p-normal);}
+
+/* LIST */
+.search-row{padding:0 16px 12px;flex-shrink:0;}
+.search-box{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px;gap:8px;box-shadow:var(--shadow);}
+.search-box input{flex:1;border:none;background:transparent;font-size:.88rem;color:var(--text);font-family:inherit;outline:none;}
+.search-box input::placeholder{color:var(--sub);}
+.search-ico{color:var(--sub);font-size:.85rem;flex-shrink:0;}
+
+.filters{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;flex-shrink:0;}
+.filters::-webkit-scrollbar{display:none;}
+.ftab{border:1.5px solid var(--border);background:var(--card);color:var(--muted);padding:5px 14px;border-radius:20px;font-size:.75rem;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;}
+.ftab.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.ftab.urgent.on{background:var(--p-urgent);border-color:var(--p-urgent);}
+.ftab.important.on{background:var(--p-important);border-color:var(--p-important);}
+.ftab.normal.on{background:var(--p-normal);border-color:var(--p-normal);}
+
+.nlist{flex:1;overflow-y:auto;padding:0 16px 90px;-webkit-overflow-scrolling:touch;}
+.nlist::-webkit-scrollbar{display:none;}
+
+.ncard{background:var(--card);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;transition:transform .12s;}
+.ncard:active{transform:scale(.98);}
+.ncard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.ncard-title{font-size:.9rem;font-weight:600;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;margin-right:8px;}
+.pbadge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;letter-spacing:.2px;}
+.pbadge.urgent{background:var(--p-urgent-bg);color:var(--p-urgent);border:1px solid var(--p-urgent-border);}
+.pbadge.important{background:var(--p-important-bg);color:var(--p-important);border:1px solid var(--p-important-border);}
+.pbadge.normal{background:var(--p-normal-bg);color:var(--p-normal);border:1px solid var(--p-normal-border);}
+.ncard-preview{font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
+.ncard-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.ncard-date{font-size:.68rem;color:var(--sub);}
+.ncard-remind{font-size:.68rem;color:var(--p-important);display:flex;align-items:center;gap:3px;}
+.ncard-pinned{position:absolute;top:12px;right:12px;font-size:.75rem;}
+
+.ncard.urgent{border-left:3px solid var(--p-urgent);}
+.ncard.important{border-left:3px solid var(--p-important);}
+.ncard.normal{border-left:3px solid var(--p-normal);}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:10px;color:var(--muted);}
+.empty-ico{font-size:2.8rem;opacity:.3;}
+.empty-txt{font-size:.85rem;text-align:center;}
+
+.sfoot{padding:8px 20px;font-size:.7rem;color:var(--sub);text-align:center;flex-shrink:0;}
+
+.fab{position:fixed;bottom:max(28px,env(safe-area-inset-bottom,20px));right:20px;width:52px;height:52px;background:var(--accent);border-radius:50%;border:none;color:#fff;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+.fab:active{transform:scale(.92);}
+
+/* EDITOR */
+#p-editor{background:var(--bg);}
+.meta-row{display:flex;gap:8px;padding:10px 16px;flex-shrink:0;overflow-x:auto;}
+.meta-row::-webkit-scrollbar{display:none;}
+
+.meta-chip{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;color:var(--muted);transition:all .15s;}
+.meta-chip:active{background:var(--border);}
+.meta-chip.active-urgent{background:var(--p-urgent-bg);border-color:var(--p-urgent);color:var(--p-urgent);}
+.meta-chip.active-important{background:var(--p-important-bg);border-color:var(--p-important);color:var(--p-important);}
+.meta-chip.active-normal{background:var(--p-normal-bg);border-color:var(--p-normal);color:var(--p-normal);}
+.meta-chip.active-pinned{background:#f0f0f0;border-color:var(--accent);color:var(--accent);}
+.meta-chip.active-remind{background:#fff8ee;border-color:var(--p-important);color:var(--p-important);}
+
+.toolbar{display:flex;gap:6px;padding:8px 16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;background:var(--card);}
+.toolbar::-webkit-scrollbar{display:none;}
+.tbtn{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:.75rem;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
+.tbtn:active{background:var(--border);}
+
+#etitle{width:100%;background:transparent;border:none;color:var(--text);font-size:1.2rem;font-weight:700;padding:16px 20px 6px;font-family:inherit;outline:none;flex-shrink:0;letter-spacing:-.3px;}
+#etitle::placeholder{color:var(--sub);}
+#ebody{flex:1;width:100%;background:transparent;border:none;color:var(--text);font-size:.9rem;line-height:1.75;padding:8px 20px 80px;font-family:inherit;outline:none;resize:none;-webkit-overflow-scrolling:touch;}
+#ebody::placeholder{color:var(--sub);}
+
+/* REMIND INPUT */
+.remind-row{padding:0 16px 8px;flex-shrink:0;}
+.remind-inp{width:100%;padding:9px 14px;border:1.5px solid var(--p-important-border);border-radius:10px;background:var(--p-important-bg);font-size:.82rem;font-family:inherit;color:var(--text);outline:none;}
+
+/* MODALS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);}
+.overlay.on{display:flex;}
+.sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:500px;padding:20px 20px max(20px,env(safe-area-inset-bottom));animation:su .25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.sheet-title{font-size:.95rem;font-weight:700;margin-bottom:14px;letter-spacing:-.2px;}
+.sopt{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.sopt:last-child{border-bottom:none;}
+.sopt-ico{font-size:1.1rem;width:28px;text-align:center;}
+.sopt-label{font-size:.88rem;font-weight:500;}
+.sopt-sub{font-size:.75rem;color:var(--muted);margin-top:1px;}
+.sopt:active{opacity:.6;}
+.sopt.danger .sopt-label{color:var(--p-urgent);}
+
+.mbox{background:var(--card);border-radius:16px;width:300px;overflow:hidden;text-align:center;animation:pop .2s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.moverlay.on{display:flex;}
+.mt{font-size:.95rem;font-weight:700;padding:18px 18px 6px;}
+.ms{font-size:.8rem;color:var(--muted);padding:0 18px 14px;}
+.mbtns{border-top:1px solid var(--border);display:flex;}
+.mbtn{flex:1;padding:13px;background:none;border:none;font-family:inherit;font-size:.88rem;cursor:pointer;color:#007aff;transition:background .1s;}
+.mbtn:active{background:var(--border);}
+.mbtn.red{color:var(--p-urgent);font-weight:700;}
+.mbtn:not(:last-child){border-right:1px solid var(--border);}
+.pinput{width:calc(100% - 32px);margin:0 16px 14px;padding:10px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:1.2rem;text-align:center;letter-spacing:6px;font-family:inherit;color:var(--text);outline:none;}
 </style>
 </head>
 <body>
 
-<div id="pin-screen" class="pin-screen">
-  <div class="pin-logo">🔐</div>
-  <div class="pin-title" id="pin-title">Введіть PIN-код</div>
-  <div class="pin-subtitle">Нотатник захищено</div>
-  <div class="pin-dots" id="pin-dots">
-    <div class="pin-dot" id="d0"></div>
-    <div class="pin-dot" id="d1"></div>
-    <div class="pin-dot" id="d2"></div>
-    <div class="pin-dot" id="d3"></div>
+<!-- PIN -->
+<div id="pin-wrap">
+  <div class="pin-icon">🔒</div>
+  <div class="pin-h">Нотатки</div>
+  <div class="pin-sub">Введіть PIN-код</div>
+  <div class="pdots">
+    <div class="pdot" id="d0"></div><div class="pdot" id="d1"></div>
+    <div class="pdot" id="d2"></div><div class="pdot" id="d3"></div>
   </div>
-  <div class="pin-error-text" id="pin-error"></div>
-  <div class="pin-keypad">
-    <button class="pin-key" onclick="pinInput('1')">1</button>
-    <button class="pin-key" onclick="pinInput('2')">2</button>
-    <button class="pin-key" onclick="pinInput('3')">3</button>
-    <button class="pin-key" onclick="pinInput('4')">4</button>
-    <button class="pin-key" onclick="pinInput('5')">5</button>
-    <button class="pin-key" onclick="pinInput('6')">6</button>
-    <button class="pin-key" onclick="pinInput('7')">7</button>
-    <button class="pin-key" onclick="pinInput('8')">8</button>
-    <button class="pin-key" onclick="pinInput('9')">9</button>
-    <button class="pin-key empty"></button>
-    <button class="pin-key" onclick="pinInput('0')">0</button>
-    <button class="pin-key" onclick="pinDelete()">⌫</button>
+  <div class="perr" id="perr"></div>
+  <div class="keypad">
+    <button class="pkey" onclick="pk('1')">1</button>
+    <button class="pkey" onclick="pk('2')">2</button>
+    <button class="pkey" onclick="pk('3')">3</button>
+    <button class="pkey" onclick="pk('4')">4</button>
+    <button class="pkey" onclick="pk('5')">5</button>
+    <button class="pkey" onclick="pk('6')">6</button>
+    <button class="pkey" onclick="pk('7')">7</button>
+    <button class="pkey" onclick="pk('8')">8</button>
+    <button class="pkey" onclick="pk('9')">9</button>
+    <button class="pkey ghost"></button>
+    <button class="pkey" onclick="pk('0')">0</button>
+    <button class="pkey" onclick="pdel()">⌫</button>
   </div>
-  <div class="pin-forgot" onclick="pinForgot()">Забули PIN?</div>
+  <div class="pforgot" onclick="resetPin()">Забули PIN?</div>
 </div>
 
-<div class="screen" id="screen-list">
-  <div class="header">
-    <div style="font-size:.85rem;color:var(--muted)" id="notes-count">0 нотаток</div>
-    <div class="header-title">📓 Нотатник</div>
-    <button class="header-btn" onclick="openSettings()">⚙️</button>
+<!-- LIST -->
+<div class="page" id="p-list">
+  <div class="hdr">
+    <span style="font-size:.78rem;color:var(--muted)" id="ncnt"></span>
+    <span class="hdr-title">Нотатки</span>
+    <button class="hbtn" onclick="openSettings()">···</button>
   </div>
-  <div class="folder-tabs">
-    <button class="folder-tab active" onclick="setFolder('all',this)">Всі</button>
-    <button class="folder-tab" onclick="setFolder('yellow',this)">🟡</button>
-    <button class="folder-tab" onclick="setFolder('green',this)">🟢</button>
-    <button class="folder-tab" onclick="setFolder('blue',this)">🔵</button>
-    <button class="folder-tab" onclick="setFolder('red',this)">🔴</button>
-    <button class="folder-tab" onclick="setFolder('purple',this)">🟣</button>
-  </div>
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input class="search-input" id="search-input" placeholder="Пошук нотаток..." oninput="renderList()">
-  </div>
-  <div class="notes-list" id="notes-list">
-    <div class="empty" id="empty-state">
-      <div class="empty-icon">📝</div>
-      <div class="empty-text">Нотаток ще немає<br><span style="font-size:.8rem">Натисніть + щоб створити</span></div>
+  <div class="search-row">
+    <div class="search-box">
+      <span class="search-ico">🔍</span>
+      <input id="sq" placeholder="Пошук..." oninput="render()">
     </div>
   </div>
-  <div class="stats-bar" id="stats-bar"></div>
+  <div class="filters">
+    <button class="ftab on" data-f="all" onclick="setF(this)">Всі</button>
+    <button class="ftab urgent" data-f="urgent" onclick="setF(this)">🔴 Терміново</button>
+    <button class="ftab important" data-f="important" onclick="setF(this)">🟡 Важливо</button>
+    <button class="ftab normal" data-f="normal" onclick="setF(this)">🟢 Звичайне</button>
+    <button class="ftab" data-f="pinned" onclick="setF(this)">📌 Закріплені</button>
+  </div>
+  <div class="nlist" id="nlist"></div>
+  <div class="sfoot" id="sfoot"></div>
   <button class="fab" onclick="newNote()">+</button>
 </div>
 
-<div class="screen" id="screen-editor">
-  <div class="header">
-    <button class="header-btn muted" onclick="goBack()">← Назад</button>
-    <button class="header-btn" onclick="saveNote()" id="btn-save" style="color:var(--accent);">Зберегти</button>
-    <button class="header-btn red" onclick="confirmDelete()" id="btn-delete" style="display:none">🗑</button>
+<!-- EDITOR -->
+<div class="page" id="p-editor">
+  <div class="hdr">
+    <button class="hbtn ghost" onclick="goBack()">← Назад</button>
+    <button class="hbtn green" id="btn-save" onclick="saveNote()">Зберегти</button>
+    <button class="hbtn red" id="btn-del" onclick="askDel()" style="display:none">Видалити</button>
   </div>
-  <div class="color-strip">
-    <div class="color-dot selected" style="background:#ffd60a" data-color="yellow" onclick="setColor('yellow',this)"></div>
-    <div class="color-dot" style="background:#30d158" data-color="green" onclick="setColor('green',this)"></div>
-    <div class="color-dot" style="background:#0a84ff" data-color="blue" onclick="setColor('blue',this)"></div>
-    <div class="color-dot" style="background:#ff453a" data-color="red" onclick="setColor('red',this)"></div>
-    <div class="color-dot" style="background:#bf5af2" data-color="purple" onclick="setColor('purple',this)"></div>
-    <div class="color-dot" style="background:#ff9f0a" data-color="orange" onclick="setColor('orange',this)"></div>
-    <div class="color-dot" style="background:#64d2ff" data-color="cyan" onclick="setColor('cyan',this)"></div>
-    <div class="color-dot" style="background:#8e8e93" data-color="gray" onclick="setColor('gray',this)"></div>
+
+  <div class="meta-row">
+    <button class="meta-chip" id="chip-priority" onclick="cyclePriority()">⚪ Звичайне</button>
+    <button class="meta-chip" id="chip-pin" onclick="togglePin()">📌 Закріпити</button>
+    <button class="meta-chip" id="chip-remind" onclick="toggleRemind()">🔔 Нагадування</button>
   </div>
-  <div class="editor-toolbar">
-    <button class="tool-btn" onclick="insertText('**','**')"><b>B</b></button>
-    <button class="tool-btn" onclick="insertText('_','_')"><i>I</i></button>
-    <button class="tool-btn" onclick="insertLine('• ')">• Список</button>
-    <button class="tool-btn" onclick="insertLine('☐ ')">☐ Задача</button>
-    <button class="tool-btn" onclick="insertLine('# ')">H1</button>
-    <button class="tool-btn" onclick="insertLine('## ')">H2</button>
-    <button class="tool-btn" onclick="insertLine('---')">— Лінія</button>
-    <button class="tool-btn" onclick="insertDate()">📅 Дата</button>
-    <button class="tool-btn" onclick="insertTime()">🕐 Час</button>
+
+  <div id="remind-row" class="remind-row" style="display:none">
+    <input class="remind-inp" type="datetime-local" id="remind-val">
   </div>
-  <input class="title-input" id="note-title" placeholder="Заголовок..." oninput="autoSave()">
-  <textarea class="note-editor" id="note-body" placeholder="Починайте писати..." oninput="autoSave()"></textarea>
+
+  <div class="toolbar">
+    <button class="tbtn" onclick="ins('**','**')"><b>B</b></button>
+    <button class="tbtn" onclick="ins('_','_')"><i>I</i></button>
+    <button class="tbtn" onclick="insl('• ')">Список</button>
+    <button class="tbtn" onclick="insl('☐ ')">Задача</button>
+    <button class="tbtn" onclick="insl('# ')">H1</button>
+    <button class="tbtn" onclick="ins(now(),'')">Дата</button>
+    <button class="tbtn" onclick="ins(nowt(),'')">Час</button>
+  </div>
+
+  <input id="etitle" placeholder="Заголовок...">
+  <textarea id="ebody" placeholder="Починайте писати..."></textarea>
 </div>
 
-<div class="modal-overlay" id="delete-modal">
-  <div class="modal-box">
-    <div class="modal-title">Видалити нотатку?</div>
-    <div class="modal-sub">Цю дію не можна скасувати</div>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="closeDeleteModal()">Скасувати</button>
-      <button class="modal-btn danger" onclick="deleteNote()">Видалити</button>
+<!-- DELETE MODAL -->
+<div class="moverlay" id="m-del">
+  <div class="mbox">
+    <div class="mt">Видалити нотатку?</div>
+    <div class="ms">Цю дію не можна скасувати</div>
+    <div class="mbtns">
+      <button class="mbtn" onclick="hide('m-del')">Скасувати</button>
+      <button class="mbtn red" onclick="doDel()">Видалити</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="settings-modal">
-  <div class="modal-box">
-    <div class="modal-title">⚙️ Налаштування</div>
-    <div class="modal-sub" id="settings-info"></div>
-    <div class="modal-actions" style="flex-direction:column;gap:0;">
-      <button class="modal-btn" onclick="changePIN()" style="border-bottom:1px solid var(--border);">🔐 Змінити PIN</button>
-      <button class="modal-btn danger" onclick="clearAll()" style="border-bottom:1px solid var(--border);">🗑 Очистити все</button>
-      <button class="modal-btn" onclick="document.getElementById('settings-modal').classList.remove('open')">Закрити</button>
+<!-- SETTINGS SHEET -->
+<div class="overlay" id="m-set" onclick="if(event.target===this)hide('m-set')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Налаштування</div>
+    <div class="sopt" onclick="changePin()">
+      <div class="sopt-ico">🔐</div>
+      <div><div class="sopt-label">Змінити PIN</div><div class="sopt-sub">Захист входу</div></div>
+    </div>
+    <div class="sopt" onclick="exportNotes()">
+      <div class="sopt-ico">📤</div>
+      <div><div class="sopt-label">Експорт нотаток</div><div class="sopt-sub">Завантажити як .txt</div></div>
+    </div>
+    <div class="sopt danger" onclick="clearAll()">
+      <div class="sopt-ico">🗑</div>
+      <div><div class="sopt-label">Очистити все</div><div class="sopt-sub" id="set-info"></div></div>
+    </div>
+    <div class="sopt" onclick="hide('m-set')">
+      <div class="sopt-ico">✕</div>
+      <div><div class="sopt-label">Закрити</div></div>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="change-pin-modal">
-  <div class="modal-box" style="width:300px;">
-    <div class="modal-title">🔐 Змінити PIN</div>
-    <div class="modal-sub">Введіть новий 4-значний PIN</div>
-    <div style="padding:0 20px 16px;">
-      <input id="new-pin-input" type="number" placeholder="1234"
-        style="width:100%;padding:10px 14px;background:var(--bg3);border:none;border-radius:10px;color:var(--text);font-size:1.4rem;text-align:center;outline:none;font-family:inherit;letter-spacing:8px;">
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="document.getElementById('change-pin-modal').classList.remove('open')">Скасувати</button>
-      <button class="modal-btn" style="color:var(--accent);font-weight:700;" onclick="saveNewPIN()">Зберегти</button>
+<!-- CHANGE PIN MODAL -->
+<div class="moverlay" id="m-pin">
+  <div class="mbox">
+    <div class="mt">🔐 Новий PIN</div>
+    <div class="ms">Введіть 4 цифри</div>
+    <input class="pinput" id="new-pin" type="tel" maxlength="4" placeholder="••••">
+    <div class="mbtns">
+      <button class="mbtn" onclick="hide('m-pin')">Скасувати</button>
+      <button class="mbtn" style="font-weight:700" onclick="savePIN()">Зберегти</button>
     </div>
   </div>
 </div>
 
 <script>
-const DEFAULT_PIN='1234';
-let pinBuffer='',pinAttempts=0;
-function getPin(){return localStorage.getItem('notepad_pin')||DEFAULT_PIN;}
-function pinInput(d){if(pinBuffer.length>=4)return;pinBuffer+=d;updatePinDots();if(pinBuffer.length===4)setTimeout(checkPin,200);}
-function pinDelete(){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();document.getElementById('pin-error').textContent='';}
-function updatePinDots(err){for(let i=0;i<4;i++){const d=document.getElementById('d'+i);d.classList.toggle('filled',i<pinBuffer.length);d.classList.toggle('error',!!err);}}
-function checkPin(){
-  if(pinBuffer===getPin()){
-    pinAttempts=0;
-    document.getElementById('pin-screen').style.display='none';
-    load();renderList();showScreen('list');
-  }else{
-    pinAttempts++;updatePinDots(true);
-    const err=document.getElementById('pin-error');
-    if(pinAttempts>=5){err.textContent='Забагато спроб. Зачекайте 30 сек.';setTimeout(()=>{pinAttempts=0;err.textContent='';},30000);}
-    else{err.textContent='Невірний PIN · Спроба '+pinAttempts+'/5';}
-    setTimeout(()=>{pinBuffer='';updatePinDots(false);},600);
+// ── STATE ─────────────────────────────────────────────────────────
+let notes=[], cid=null, cpriority='normal', cpinned=false, cremind='', cfilter='all', pbuf='', pattempts=0;
+
+// ── STORAGE ───────────────────────────────────────────────────────
+const LS = 'nv4';
+function load(){try{notes=JSON.parse(localStorage.getItem(LS)||'[]');}catch(e){notes=[];}}
+function save(){localStorage.setItem(LS,JSON.stringify(notes));}
+function getPin(){return localStorage.getItem('pin')||'1234';}
+
+// ── PIN ───────────────────────────────────────────────────────────
+function pk(d){
+  if(pbuf.length>=4)return;
+  pbuf+=d; updDots();
+  if(pbuf.length===4)setTimeout(checkPin,180);
+}
+function pdel(){pbuf=pbuf.slice(0,-1);updDots();document.getElementById('perr').textContent='';}
+function updDots(e){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('d'+i);
+    d.className='pdot'+(i<pbuf.length?' on':'')+(e?' err':'');
   }
 }
-function pinForgot(){if(confirm('Скинути PIN до 1234?')){localStorage.removeItem('notepad_pin');alert('PIN скинуто до: 1234');pinBuffer='';updatePinDots();document.getElementById('pin-error').textContent='';}}
-function changePIN(){document.getElementById('settings-modal').classList.remove('open');document.getElementById('new-pin-input').value='';document.getElementById('change-pin-modal').classList.add('open');}
-function saveNewPIN(){const v=document.getElementById('new-pin-input').value;if(v.length!==4||isNaN(v)){alert('PIN має бути 4 цифри');return;}localStorage.setItem('notepad_pin',v);document.getElementById('change-pin-modal').classList.remove('open');alert('PIN змінено!');}
-
-let notes=[],currentId=null,currentColor='yellow',currentFolder='all',saveTimer=null;
-const COLORS={yellow:'#ffd60a',green:'#30d158',blue:'#0a84ff',red:'#ff453a',purple:'#bf5af2',orange:'#ff9f0a',cyan:'#64d2ff',gray:'#8e8e93'};
-function load(){try{notes=JSON.parse(localStorage.getItem('notes_v2')||'[]');}catch(e){notes=[];}}
-function save(){localStorage.setItem('notes_v2',JSON.stringify(notes));}
-function renderList(){
-  const q=document.getElementById('search-input').value.toLowerCase();
-  let filtered=(currentFolder==='all'?notes:notes.filter(n=>(n.color||'yellow')===currentFolder)).filter(n=>!q||n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated);
-  const list=document.getElementById('notes-list'),empty=document.getElementById('empty-state');
-  document.getElementById('notes-count').textContent=notes.length+' '+plural(notes.length,'нотатка','нотатки','нотаток');
-  if(!filtered.length){list.innerHTML='';list.appendChild(empty);empty.style.display='flex';document.getElementById('stats-bar').textContent='';return;}
-  empty.style.display='none';
-  const tc=notes.reduce((a,n)=>a+(n.body||'').length,0);
-  document.getElementById('stats-bar').textContent=notes.length+' нотаток · '+tc+' символів';
-  list.innerHTML=filtered.map(n=>{const color=COLORS[n.color]||COLORS.yellow;const preview=(n.body||'').replace(/\n/g,' ').substring(0,60)||'Порожня нотатка';
-    return`<div class="note-item" onclick="openNote('${n.id}')"><div class="note-color-bar" style="background:${color}"></div><div class="note-title">${escHtml(n.title||'Без назви')}</div><div class="note-preview">${escHtml(preview)}</div><div class="note-date">${formatDate(n.updated)}</div></div>`;}).join('');
+function checkPin(){
+  if(pbuf===getPin()){
+    pattempts=0;
+    document.getElementById('pin-wrap').style.display='none';
+    load(); render(); show('p-list');
+  } else {
+    pattempts++;
+    updDots(true);
+    const e=document.getElementById('perr');
+    if(pattempts>=5){e.textContent='Забагато спроб. Зачекайте 30 сек.';setTimeout(()=>{pattempts=0;e.textContent='';},30000);}
+    else e.textContent='Невірний PIN · спроба '+pattempts+'/5';
+    setTimeout(()=>{pbuf='';updDots(false);},600);
+  }
 }
-function newNote(){currentId='n'+Date.now();currentColor='yellow';document.getElementById('note-title').value='';document.getElementById('note-body').value='';document.getElementById('btn-delete').style.display='none';updateColorDots('yellow');showScreen('editor');setTimeout(()=>document.getElementById('note-title').focus(),300);}
-function openNote(id){const n=notes.find(x=>x.id===id);if(!n)return;currentId=id;currentColor=n.color||'yellow';document.getElementById('note-title').value=n.title||'';document.getElementById('note-body').value=n.body||'';document.getElementById('btn-delete').style.display='';updateColorDots(currentColor);showScreen('editor');}
-function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const title=document.getElementById('note-title').value.trim();const body=document.getElementById('note-body').value;if(!title&&!body)return;const idx=notes.findIndex(n=>n.id===currentId);const note={id:currentId,title,body,color:currentColor,updated:Date.now()};if(idx>=0)notes[idx]=note;else notes.push(note);save();},500);}
+function resetPin(){if(confirm('Скинути PIN до 1234?')){localStorage.removeItem('pin');pbuf='';updDots();document.getElementById('perr').textContent='PIN скинуто до 1234';}}
+function changePin(){hide('m-set');document.getElementById('new-pin').value='';show2('m-pin');}
+function savePIN(){const v=document.getElementById('new-pin').value;if(!/^\d{4}$/.test(v)){alert('PIN має бути 4 цифри');return;}localStorage.setItem('pin',v);hide('m-pin');alert('PIN змінено!');}
+
+// ── RENDER ────────────────────────────────────────────────────────
+const PLABEL={urgent:'Терміново',important:'Важливо',normal:'Звичайне'};
+const PCLASS={urgent:'urgent',important:'important',normal:'normal'};
+
+function render(){
+  load();
+  const q=(document.getElementById('sq').value||'').toLowerCase();
+  let list=notes.filter(n=>{
+    if(cfilter==='pinned') return n.pinned;
+    if(cfilter!=='all') return n.priority===cfilter;
+    return true;
+  }).filter(n=>!q||(n.title||'').toLowerCase().includes(q)||(n.body||'').toLowerCase().includes(q));
+
+  // Сортування: закріплені вгорі, потім за пріоритетом, потім за датою
+  const po={urgent:0,important:1,normal:2};
+  list.sort((a,b)=>{
+    if(a.pinned&&!b.pinned)return -1;
+    if(!a.pinned&&b.pinned)return 1;
+    if((po[a.priority]||2)!==(po[b.priority]||2))return (po[a.priority]||2)-(po[b.priority]||2);
+    return b.updated-a.updated;
+  });
+
+  document.getElementById('ncnt').textContent=notes.length+' '+pl(notes.length,'нотатка','нотатки','нотаток');
+  const el=document.getElementById('nlist');
+
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">📝</div><div class="empty-txt">'+(cfilter!=='all'?'Нотаток у цій категорії немає':'Нотаток ще немає<br><small>Натисніть + щоб створити</small>')+'</div></div>';
+    document.getElementById('sfoot').textContent='';return;
+  }
+
+  document.getElementById('sfoot').textContent=list.length+(cfilter!=='all'?' зі '+notes.length:'')+' нотаток';
+
+  el.innerHTML=list.map(n=>{
+    const pc=PCLASS[n.priority||'normal'];
+    const prev=(n.body||'').replace(/\n/g,' ').substring(0,60)||'';
+    const rem=n.remind?'<span class="ncard-remind">🔔 '+fmtRemind(n.remind)+'</span>':'';
+    return`<div class="ncard ${pc}" onclick="openNote('${n.id}')">
+      <div class="ncard-top">
+        <div class="ncard-title">${esc(n.title||'Без назви')}</div>
+        <span class="pbadge ${pc}">${PLABEL[n.priority||'normal']}</span>
+      </div>
+      ${prev?`<div class="ncard-preview">${esc(prev)}</div>`:''}
+      <div class="ncard-footer">
+        <span class="ncard-date">${ago(n.updated)}</span>
+        ${rem}
+      </div>
+      ${n.pinned?'<div class="ncard-pinned">📌</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function setF(el){
+  cfilter=el.dataset.f;
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  render();
+}
+
+// ── EDITOR ────────────────────────────────────────────────────────
+function newNote(){
+  cid='n'+Date.now(); cpriority='normal'; cpinned=false; cremind='';
+  document.getElementById('etitle').value='';
+  document.getElementById('ebody').value='';
+  document.getElementById('btn-del').style.display='none';
+  document.getElementById('remind-row').style.display='none';
+  document.getElementById('remind-val').value='';
+  updChips();
+  show('p-editor');
+  setTimeout(()=>document.getElementById('etitle').focus(),300);
+}
+
+function openNote(id){
+  load();
+  const n=notes.find(x=>x.id===id); if(!n)return;
+  cid=id; cpriority=n.priority||'normal'; cpinned=!!n.pinned; cremind=n.remind||'';
+  document.getElementById('etitle').value=n.title||'';
+  document.getElementById('ebody').value=n.body||'';
+  document.getElementById('btn-del').style.display='';
+  document.getElementById('remind-val').value=cremind;
+  document.getElementById('remind-row').style.display=cremind?'block':'none';
+  updChips();
+  show('p-editor');
+}
+
 function saveNote(){
-  const title=document.getElementById('note-title').value.trim();
-  const body=document.getElementById('note-body').value;
+  const title=document.getElementById('etitle').value.trim();
+  const body=document.getElementById('ebody').value;
   if(!title&&!body){alert('Нотатка порожня');return;}
-  const idx=notes.findIndex(n=>n.id===currentId);
-  const note={id:currentId,title,body,color:currentColor,updated:Date.now()};
-  if(idx>=0)notes[idx]=note;else notes.push(note);
+  cremind=document.getElementById('remind-val').value||'';
+  load();
+  const idx=notes.findIndex(n=>n.id===cid);
+  const note={id:cid,title,body,priority:cpriority,pinned:cpinned,remind:cremind,updated:Date.now()};
+  if(idx>=0)notes[idx]=note; else notes.push(note);
   save();
   const btn=document.getElementById('btn-save');
-  btn.textContent='Збережено ✓';
-  btn.style.color='var(--accent2)';
-  setTimeout(()=>{btn.textContent='Зберегти';btn.style.color='var(--accent)';},1500);
+  btn.textContent='✓ Збережено'; btn.style.color='var(--p-normal)';
+  setTimeout(()=>{btn.textContent='Зберегти';btn.style.color='var(--p-normal)';},1400);
+  document.getElementById('btn-del').style.display='';
 }
-function confirmDelete(){document.getElementById('delete-modal').classList.add('open');}
-function closeDeleteModal(){document.getElementById('delete-modal').classList.remove('open');}
-function deleteNote(){notes=notes.filter(n=>n.id!==currentId);save();closeDeleteModal();goBack();}
-function setColor(c,el){currentColor=c;updateColorDots(c);autoSave();}
-function updateColorDots(c){document.querySelectorAll('.color-dot').forEach(d=>d.classList.toggle('selected',d.dataset.color===c));}
-function insertText(b,a){const ta=document.getElementById('note-body');const s=ta.selectionStart,e=ta.selectionEnd,sel=ta.value.substring(s,e);ta.value=ta.value.substring(0,s)+b+sel+a+ta.value.substring(e);ta.selectionStart=ta.selectionEnd=s+b.length+sel.length+a.length;ta.focus();autoSave();}
-function insertLine(p){const ta=document.getElementById('note-body'),s=ta.selectionStart;const before=ta.value.substring(0,s),after=ta.value.substring(s);const nl=before.length>0&&!before.endsWith('\n')?'\n':'';ta.value=before+nl+p+after;ta.selectionStart=ta.selectionEnd=before.length+nl.length+p.length;ta.focus();autoSave();}
-function insertDate(){insertText(new Date().toLocaleDateString('uk-UA'),'');}
-function insertTime(){insertText(new Date().toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'}),'');}
-function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+n).classList.add('active');}
-function goBack(){load();showScreen('list');renderList();}
-function setFolder(f,el){currentFolder=f;document.querySelectorAll('.folder-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');load();setTimeout(renderList,50);}
-function openSettings(){const kb=(JSON.stringify(notes).length/1024).toFixed(1);document.getElementById('settings-info').textContent=notes.length+' нотаток · '+kb+' КБ · PIN ✅';document.getElementById('settings-modal').classList.add('open');}
-function clearAll(){if(!confirm('Видалити всі нотатки?'))return;notes=[];save();document.getElementById('settings-modal').classList.remove('open');renderList();}
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function formatDate(ts){const diff=Date.now()-ts;if(diff<60000)return'щойно';if(diff<3600000)return Math.floor(diff/60000)+' хв тому';if(diff<86400000)return Math.floor(diff/3600000)+' год тому';if(diff<604800000)return Math.floor(diff/86400000)+' дн тому';return new Date(ts).toLocaleDateString('uk-UA');}
-function plural(n,a,b,c){const m=n%10;if(n%100>=11&&n%100<=14)return c;if(m===1)return a;if(m>=2&&m<=4)return b;return c;}
+
+function cyclePriority(){
+  const order=['normal','important','urgent'];
+  cpriority=order[(order.indexOf(cpriority)+1)%3];
+  updChips();
+}
+function togglePin(){cpinned=!cpinned;updChips();}
+function toggleRemind(){
+  const row=document.getElementById('remind-row');
+  if(row.style.display==='none'){row.style.display='block';document.getElementById('remind-val').focus();}
+  else{row.style.display='none';document.getElementById('remind-val').value='';cremind='';}
+  updChips();
+}
+function updChips(){
+  const pc=document.getElementById('chip-priority');
+  const icons={urgent:'🔴',important:'🟡',normal:'⚪'};
+  pc.textContent=icons[cpriority]+' '+PLABEL[cpriority];
+  pc.className='meta-chip active-'+cpriority;
+  const pp=document.getElementById('chip-pin');
+  pp.textContent=cpinned?'📌 Закріплено':'📌 Закріпити';
+  pp.className='meta-chip'+(cpinned?' active-pinned':'');
+  const pr=document.getElementById('chip-remind');
+  const hasR=document.getElementById('remind-row').style.display!=='none';
+  pr.textContent=hasR?'🔔 Нагадування ✓':'🔔 Нагадування';
+  pr.className='meta-chip'+(hasR?' active-remind':'');
+}
+
+function askDel(){show2('m-del');}
+function doDel(){load();notes=notes.filter(n=>n.id!==cid);save();hide('m-del');goBack();}
+function goBack(){show('p-list');render();}
+
+// ── TOOLBAR ───────────────────────────────────────────────────────
+function ins(b,a){const ta=document.getElementById('ebody'),s=ta.selectionStart,e=ta.selectionEnd,sel=ta.value.substring(s,e);ta.value=ta.value.substring(0,s)+b+sel+a+ta.value.substring(e);ta.selectionStart=ta.selectionEnd=s+b.length+sel.length+a.length;ta.focus();}
+function insl(p){const ta=document.getElementById('ebody'),s=ta.selectionStart,bef=ta.value.substring(0,s),aft=ta.value.substring(s),nl=bef.length>0&&!bef.endsWith('\n')?'\n':'';ta.value=bef+nl+p+aft;ta.selectionStart=ta.selectionEnd=bef.length+nl.length+p.length;ta.focus();}
+function now(){return new Date().toLocaleDateString('uk-UA');}
+function nowt(){return new Date().toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'});}
+
+// ── SETTINGS ──────────────────────────────────────────────────────
+function openSettings(){
+  load();
+  const kb=(JSON.stringify(notes).length/1024).toFixed(1);
+  document.getElementById('set-info').textContent=notes.length+' нотаток · '+kb+' КБ';
+  show2('m-set');
+}
+function clearAll(){if(!confirm('Видалити ВСІ нотатки?'))return;notes=[];save();hide('m-set');render();}
+function exportNotes(){
+  load();
+  const txt=notes.map(n=>'=== '+( n.title||'Без назви')+' ===\n'+'Пріоритет: '+PLABEL[n.priority||'normal']+'\nДата: '+new Date(n.updated).toLocaleString('uk-UA')+'\n\n'+(n.body||'')+'\n').join('\n---\n\n');
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
+  a.download='нотатки_'+now().replace(/\./g,'-')+'.txt';
+  a.click();
+  hide('m-set');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function show2(id){document.getElementById(id).classList.add('on');}
+function hide(id){document.getElementById(id).classList.remove('on');}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ago(ts){const d=Date.now()-ts;if(d<60000)return'щойно';if(d<3600000)return Math.floor(d/60000)+' хв';if(d<86400000)return Math.floor(d/3600000)+' год';if(d<604800000)return Math.floor(d/86400000)+' дн';return new Date(ts).toLocaleDateString('uk-UA');}
+function fmtRemind(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('uk-UA')+' '+d.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'});}
+function pl(n,a,b,c){const m=n%10;if(n%100>=11&&n%100<=14)return c;if(m===1)return a;if(m>=2&&m<=4)return b;return c;}
+
+// Swipe back
 let tx=0;
 document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});
-document.addEventListener('touchend',e=>{if(e.changedTouches[0].clientX-tx>80&&tx<40&&document.getElementById('screen-editor').classList.contains('active'))goBack();});
+document.addEventListener('touchend',e=>{if(e.changedTouches[0].clientX-tx>70&&tx<40&&document.getElementById('p-editor').classList.contains('on'))goBack();});
 </script>
 </body>
 </html>
