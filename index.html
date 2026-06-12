@@ -138,7 +138,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
 <div class="screen" id="screen-editor">
   <div class="header">
     <button class="header-btn muted" onclick="goBack()">← Назад</button>
-    <div class="header-title">Нотатка</div>
+    <button class="header-btn" onclick="saveNote()" id="btn-save" style="color:var(--accent);">Зберегти</button>
     <button class="header-btn red" onclick="confirmDelete()" id="btn-delete" style="display:none">🗑</button>
   </div>
   <div class="color-strip">
@@ -247,6 +247,19 @@ function renderList(){
 function newNote(){currentId='n'+Date.now();currentColor='yellow';document.getElementById('note-title').value='';document.getElementById('note-body').value='';document.getElementById('btn-delete').style.display='none';updateColorDots('yellow');showScreen('editor');setTimeout(()=>document.getElementById('note-title').focus(),300);}
 function openNote(id){const n=notes.find(x=>x.id===id);if(!n)return;currentId=id;currentColor=n.color||'yellow';document.getElementById('note-title').value=n.title||'';document.getElementById('note-body').value=n.body||'';document.getElementById('btn-delete').style.display='';updateColorDots(currentColor);showScreen('editor');}
 function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const title=document.getElementById('note-title').value.trim();const body=document.getElementById('note-body').value;if(!title&&!body)return;const idx=notes.findIndex(n=>n.id===currentId);const note={id:currentId,title,body,color:currentColor,updated:Date.now()};if(idx>=0)notes[idx]=note;else notes.push(note);save();},500);}
+function saveNote(){
+  const title=document.getElementById('note-title').value.trim();
+  const body=document.getElementById('note-body').value;
+  if(!title&&!body){alert('Нотатка порожня');return;}
+  const idx=notes.findIndex(n=>n.id===currentId);
+  const note={id:currentId,title,body,color:currentColor,updated:Date.now()};
+  if(idx>=0)notes[idx]=note;else notes.push(note);
+  save();
+  const btn=document.getElementById('btn-save');
+  btn.textContent='Збережено ✓';
+  btn.style.color='var(--accent2)';
+  setTimeout(()=>{btn.textContent='Зберегти';btn.style.color='var(--accent)';},1500);
+}
 function confirmDelete(){document.getElementById('delete-modal').classList.add('open');}
 function closeDeleteModal(){document.getElementById('delete-modal').classList.remove('open');}
 function deleteNote(){notes=notes.filter(n=>n.id!==currentId);save();closeDeleteModal();goBack();}
