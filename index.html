@@ -161,6 +161,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
   <div class="pdots">
     <div class="pdot" id="d0"></div><div class="pdot" id="d1"></div>
     <div class="pdot" id="d2"></div><div class="pdot" id="d3"></div>
+    <div class="pdot" id="d4"></div><div class="pdot" id="d5"></div>
   </div>
   <div class="perr" id="perr"></div>
   <div class="keypad">
@@ -278,7 +279,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;backg
   <div class="mbox">
     <div class="mt">🔐 Новий PIN</div>
     <div class="ms">Введіть 4 цифри</div>
-    <input class="pinput" id="new-pin" type="tel" maxlength="4" placeholder="••••">
+    <input class="pinput" id="new-pin" type="tel" maxlength="4" placeholder="••••••">
     <div class="mbtns">
       <button class="mbtn" onclick="hide('m-pin')">Скасувати</button>
       <button class="mbtn" style="font-weight:700" onclick="savePIN()">Зберегти</button>
@@ -294,17 +295,17 @@ let notes=[], cid=null, cpriority='normal', cpinned=false, cremind='', cfilter='
 const LS = 'nv4';
 function load(){try{notes=JSON.parse(localStorage.getItem(LS)||'[]');}catch(e){notes=[];}}
 function save(){localStorage.setItem(LS,JSON.stringify(notes));}
-function getPin(){return localStorage.getItem('pin')||'1234';}
+function getPin(){return localStorage.getItem('pin')||'123456';}
 
 // ── PIN ───────────────────────────────────────────────────────────
 function pk(d){
-  if(pbuf.length>=4)return;
+  if(pbuf.length>=6)return;
   pbuf+=d; updDots();
-  if(pbuf.length===4)setTimeout(checkPin,180);
+  if(pbuf.length===6)setTimeout(checkPin,180);
 }
 function pdel(){pbuf=pbuf.slice(0,-1);updDots();document.getElementById('perr').textContent='';}
 function updDots(e){
-  for(let i=0;i<4;i++){
+  for(let i=0;i<6;i++){
     const d=document.getElementById('d'+i);
     d.className='pdot'+(i<pbuf.length?' on':'')+(e?' err':'');
   }
@@ -325,7 +326,7 @@ function checkPin(){
 }
 function resetPin(){if(confirm('Скинути PIN до 1234?')){localStorage.removeItem('pin');pbuf='';updDots();document.getElementById('perr').textContent='PIN скинуто до 1234';}}
 function changePin(){hide('m-set');document.getElementById('new-pin').value='';show2('m-pin');}
-function savePIN(){const v=document.getElementById('new-pin').value;if(!/^\d{4}$/.test(v)){alert('PIN має бути 4 цифри');return;}localStorage.setItem('pin',v);hide('m-pin');alert('PIN змінено!');}
+function savePIN(){const v=document.getElementById('new-pin').value;if(!/^\d{6}$/.test(v)){alert('PIN має бути 6 цифр');return;}localStorage.setItem('pin',v);hide('m-pin');alert('PIN змінено!');}
 
 // ── RENDER ────────────────────────────────────────────────────────
 const PLABEL={urgent:'Терміново',important:'Важливо',normal:'Звичайне'};
